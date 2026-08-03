@@ -1,14 +1,47 @@
-from services.ai_service import AIService
+from app.services.ai_service import AIService
+import traceback
 
 
 class VerificationService:
+
     def __init__(self):
         self.ai = AIService()
 
-    async def verify(self, text: str):
-        result = await self.ai.verify_news(text)
+    async def verify(self, claim: str):
 
-        return {
-            "verdict": "Analysis Complete",
-            "explanation": result
-        }
+        try:
+            result = await self.ai.verify_news(claim)
+
+            print("=" * 60)
+            print("AI RESULT:")
+            print(result)
+            print("=" * 60)
+
+            if result is None:
+                return {
+                    "verdict": "Error",
+                    "confidence": 0,
+                    "explanation": "AI service returned no response.",
+                    "sources": [],
+                    "claim": claim,
+                }
+
+            return {
+                "verdict": result.get("verdict", "Unknown"),
+                "confidence": result.get("confidence", 0),
+                "explanation": result.get("explanation", ""),
+                "sources": result.get("sources", []),
+                "claim": claim,
+            }
+
+        except Exception as e:
+
+            traceback.print_exc()
+
+            return {
+                "verdict": "Error",
+                "confidence": 0,
+                "explanation": str(e),
+                "sources": [],
+                "claim": claim,
+            }

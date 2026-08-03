@@ -1,51 +1,90 @@
 from openai import AsyncOpenAI
-from Core.config import OPENAI_API_KEY
-from services.getarticle import get_articles
+from app.Core.config import OPENAI_API_KEY
+from app.services.getarticle import get_articles
+import json
 
 
 class AIService:
     def __init__(self):
         self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
-    async def verify_news(self, text: str):
-        article_context = await get_articles(text)
+    async def verify_news(self, claim: str):
+        article_context = await get_articles(claim)
 
         response = await self.client.responses.create(
             model="gpt-5.5",
             input=[
-                             {
-            "role": "system",
-            "content": """
-You are a fact-checking assistant.
+                {
+                    "role": "system",
+                    "content": """
+    You are a fact-checking assistant.
 
-Your task:
-- Analyze news claims.
-- Compare claims with provided sources.
-- Determine if information is true, false, misleading, or partially true.
-- Explain your reasoning.
-- Provide a truth confidence percentage.
+    Analyze news claims using the provided articles.
 
-Do not invent sources.
-Only use the provided articles as evidence.
-"""
-        },
-        {
-            "role": "user",
-            "content": f"""
-Claim from user:
+    Return ONLY valid JSON:
 
-{text}
+    {
+        "verdict": "true | false | misleading | partially true",
+        "confidence": 0-100,
+        "explanation": "short explanation",
+        "sources_used": [
+            "source titles used"
+        ]
+    }
 
+    Do not invent sources.
+    """
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+    Claim:
 
-Available news sources:
+    {claim}
 
-{article_context}
+    Articles:
 
-
-Now perform a fact check.
-"""
-        }
+    {article_context}
+    """
+                }
             ]
         )
 
-        return response.output_text
+        import json
+
+        return json.loads(response.output_text)
+    
+    
+    async def detect_language_gpt(self, text: str):
+        response = await self.client.responses.create(
+            model="gpt-5.5",
+            input=[
+                {
+                    "role": "system",
+                    "content": """
+    You are a language detection system.
+
+    Return ONLY valid JSON.
+
+    Schema:
+
+    {
+        "language_name": "...",
+        "iso_code": "...",
+        "confidence": 0-100
+    }
+
+    Rules:
+    - Use ISO 639-1 codes whenever available (en, fr, sw, ln).
+    - If the language has no ISO 639-1 code, use ISO 639-3.
+    - Do not explain your answer.
+    """
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+        )
+        return json.loads(response.output_text)
+    

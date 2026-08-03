@@ -1,12 +1,12 @@
 #create POST /verify
 from fastapi import APIRouter
 
-from schemas.verification import (
+from app.schemas.verification import (
     VerificationRequest,
     VerificationResponse
 )
 
-from services.verify import VerificationService
+from app.services.verify import VerificationService
 
 router = APIRouter()
 

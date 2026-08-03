@@ -7,9 +7,14 @@ from telegram.ext import (
     filters,
 )
 
-from Core.config import BOT_TOKEN, OPENAI_API_KEY
+from app.Core.config import BOT_TOKEN, OPENAI_API_KEY
+from app.services.getarticle import get_articles
+from app.bot.handlers.photo import handle_photo
+from app.bot.handlers.url import handle_url
+
 import openai
-from services.getarticle import get_articles
+import re
+
 
 WELCOME_MESSAGE = """
 👋 Welcome to NewsGuardian!
@@ -17,13 +22,12 @@ WELCOME_MESSAGE = """
 Send me:
 
 📰 News text
-
 📷 Screenshot
-
 🔗 News link
 
 and I'll verify it.
 """
+
 
 HELP_MESSAGE = """
 Send me:
@@ -34,48 +38,86 @@ Send me:
 I'll analyze it and explain the result.
 """
 
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message:
-        await update.message.reply_text(WELCOME_MESSAGE)
+# URL detection pattern
+URL_PATTERN = r"https?://[^\s]+"
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+# OpenAI client
+client = openai.OpenAI(
+    api_key=OPENAI_API_KEY
+)
+
+
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
     if update.message:
         await update.message.reply_text(
-            "You can send me news articles or links, and I'll help you verify their authenticity."
+            WELCOME_MESSAGE
         )
 
 
-async def handle_message(update, context):
+async def help_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    if update.message:
+        await update.message.reply_text(
+            HELP_MESSAGE
+        )
+
+
+async def handle_message(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
     if not update.message or not update.message.text:
         return
-    user_text = update.message.text
-    # Get 10 first articles from the web related to the user_text
-    article_context = get_articles(user_text)
-    # Add the articles to the user_text for context
+
+
+    user_text = update.message.text.strip()
+
+
+    print("TEXT MESSAGE:")
+    print(user_text)
+
+
+    # Fetch related articles
+    article_context = await get_articles(
+        user_text
+    )
+
+
     response = client.chat.completions.create(
         model="gpt-5.5",
         messages=[
-             {
-            "role": "system",
-            "content": """
+            {
+                "role": "system",
+                "content": """
 You are a fact-checking assistant.
 
-Your task:
+Your tasks:
+
 - Analyze news claims.
 - Compare claims with provided sources.
 - Determine if information is true, false, misleading, or partially true.
-- Explain your reasoning.
-- Provide a truth confidence percentage.
+- Explain reasoning.
+- Provide confidence percentage.
 
-Do not invent sources.
-Only use the provided articles as evidence.
+Rules:
+- Do not invent sources.
+- Only use provided articles as evidence.
 """
-        },
-        {
-            "role": "user",
-            "content": f"""
+            },
+
+            {
+                "role": "user",
+                "content": f"""
 Claim from user:
 
 {user_text}
@@ -86,9 +128,9 @@ Available news sources:
 {article_context}
 
 
-Now perform a fact check.
+Perform fact checking.
 """
-        }
+            }
         ]
     )
 
@@ -98,14 +140,71 @@ Now perform a fact check.
     )
 
 
-def create_bot():
-    application = Application.builder().token(BOT_TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+def create_bot():
+
+    application = Application.builder().token(
+        BOT_TOKEN
+    ).build()
+
+
+    application.add_handler(
+        MessageHandler(
+            filters.Regex(URL_PATTERN),
+            handle_url
+        )
+    )
+
+    application.add_handler(
+        MessageHandler(
+            filters.PHOTO
+            & filters.CaptionRegex(URL_PATTERN),
+            handle_url
+        )
+    )
+
+    application.add_handler(
+        CommandHandler(
+            "start",
+            start
+        )
+    )
+
+
+    application.add_handler(
+        CommandHandler(
+            "help",
+            help_command
+        )
+    )
+
+
+    application.add_handler(
+        MessageHandler(
+            filters.PHOTO,
+            handle_photo
+        )
+    )
+
+
+    application.add_handler(
+        MessageHandler(
+            filters.TEXT
+            & ~filters.COMMAND
+            & ~filters.Regex(URL_PATTERN),
+            handle_message
+        )
+    )
+
+
+    print("Bot is running...")
+
     return application
 
+
+
 if __name__ == "__main__":
+
     bot = create_bot()
+
     bot.run_polling()
