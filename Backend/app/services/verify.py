@@ -1,5 +1,6 @@
 from app.services.ai_service import AIService
 import traceback
+from app.utils.logger import logger
 
 
 class VerificationService:
@@ -11,12 +12,6 @@ class VerificationService:
 
         try:
             result = await self.ai.verify_news(claim)
-
-            print("=" * 60)
-            print("AI RESULT:")
-            print(result)
-            print("=" * 60)
-
             if result is None:
                 return {
                     "verdict": "Error",

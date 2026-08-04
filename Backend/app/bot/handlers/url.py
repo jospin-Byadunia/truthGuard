@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 import httpx
+from app.utils.logger import logger
 
 API_URL = "http://localhost:8000/verify/url"
 
@@ -12,10 +13,11 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     url = update.message.text.strip()
     caption = update.message.caption or ""
+    
 
     try:
         async with httpx.AsyncClient(timeout=30) as client:
-
+            logger.info("Sending URL to verification API")
             response = await client.post(
                 API_URL,
                 json={
@@ -28,7 +30,7 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             data = response.json()
 
-            print(f"Received response: {data}")
+            logger.info("Verification completed successfully")
 
             message = f"""
 ✅ URL verification successful!
@@ -49,6 +51,4 @@ explanation:
             await update.message.reply_text(message)
 
     except httpx.HTTPError as e:
-        await update.message.reply_text(
-            f"❌ Error verifying URL: {str(e)}"
-        )
+        logger.exception(f"URL verification failed: {e}")

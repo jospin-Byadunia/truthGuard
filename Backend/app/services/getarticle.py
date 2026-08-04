@@ -9,7 +9,7 @@ NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
 URL = "https://newsapi.org/v2/everything"
 
 from app.services.lang_service import AILanguageService
-
+from app.utils.logger import logger
 ai_service = AILanguageService()
 
 async def detect_language(text: str) -> str:
@@ -18,6 +18,7 @@ async def detect_language(text: str) -> str:
 
 async def get_articles(query: str) -> str:
     search_query = query.replace("\n", " ").strip()[:200]
+    logger.info(f"Searching NewsAPI for: {search_query}")
     language = await detect_language(search_query)
     params = {
         "q": search_query,
@@ -34,11 +35,12 @@ async def get_articles(query: str) -> str:
     data = response.json()
     
 
-    print("NEWS API RESPONSE:")
-    print(data)
+    logger.info(
+        f"NewsAPI status code: {response.status_code}"
+    )
 
     if data.get("status") != "ok":
-        print("NewsAPI returned an error:", data)
+        logger.error(f"NewsAPI returned an error: {data}")
         return ""
 
     articles = data.get("articles", [])
@@ -53,8 +55,5 @@ Description: {article.get('description', '')}
 Source: {article.get('url', '')}
 
 """
-
-    print("Search query:", search_query)
-    print("Articles found:", len(articles))
 
     return article_context

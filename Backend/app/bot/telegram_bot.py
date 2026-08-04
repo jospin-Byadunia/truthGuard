@@ -11,6 +11,7 @@ from app.Core.config import BOT_TOKEN, OPENAI_API_KEY
 from app.services.getarticle import get_articles
 from app.bot.handlers.photo import handle_photo
 from app.bot.handlers.url import handle_url
+from app.utils.logger import logger
 
 import openai
 import re
@@ -49,16 +50,17 @@ client = openai.OpenAI(
 )
 
 
-async def start(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
+async def start(update, context):
 
     if update.message:
+
+        logger.info(
+            f"User {update.effective_user.id} started the bot"
+        )
+
         await update.message.reply_text(
             WELCOME_MESSAGE
         )
-
 
 async def help_command(
     update: Update,

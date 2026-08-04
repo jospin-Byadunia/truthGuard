@@ -1,4 +1,5 @@
 from newspaper import Article
+from app.utils.logger import logger
 
 
 async def extract_article(url):
@@ -8,10 +9,8 @@ async def extract_article(url):
     article.download()
     article.parse()
     
-    print("=" * 50)
-    print("ARTICLE EXTRACTION:")
-    print(article)
-    print("=" * 50)
+    logger.info("Article extraction DONE")
+   
 
     return {
         "title": article.title,

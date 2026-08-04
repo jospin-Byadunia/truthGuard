@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException,Form
 from pathlib import Path
 import shutil
 import uuid
-
+from app.utils.logger import logger
 from app.services.document_processor.ocr import OCRService
 from app.services.verify import VerificationService
 
@@ -32,13 +32,10 @@ async def verify_photo(file: UploadFile = File(...),
         shutil.copyfileobj(file.file, buffer)
 
     try:
+        logger.info("Starting OCR service")
+
         extracted_text = await ocr.extract_text(str(image_path))
-
-        print("=" * 50)
-        print("OCR OUTPUT:")
-        print(repr(extracted_text))
-        print("=" * 50)
-
+        logger.info("OCR extraction completed")
         # Stop if nothing was extracted and no caption exists
         if not extracted_text.strip() and not caption.strip():
             return {
@@ -60,18 +57,7 @@ async def verify_photo(file: UploadFile = File(...),
 
         claim = "\n\n".join(claim_parts)
 
-        print("=" * 50)
-        print("CLAIM:")
-        print(claim)
-        print("=" * 50)
-
-        # Verify
         result = await verifier.verify(claim)
-        print("=" * 50)
-        print("VERIFICATION RESULT:")
-        print(result)
-        print("=" * 50)
-
         return result
 
     finally:

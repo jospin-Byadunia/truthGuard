@@ -1,6 +1,7 @@
 from openai import AsyncOpenAI
 from app.Core.config import OPENAI_API_KEY
 from app.services.getarticle import get_articles
+from app.utils.logger import logger
 import json
 
 
@@ -9,8 +10,9 @@ class AIService:
         self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
     async def verify_news(self, claim: str):
+        logger.info(f"Verifying claim: {claim}")
         article_context = await get_articles(claim)
-
+        logger.info("Sending verification request to GPT")
         response = await self.client.responses.create(
             model="gpt-5.5",
             input=[
@@ -50,8 +52,7 @@ class AIService:
             ]
         )
 
-        import json
-
+        logger.info("GPT verification Completed")
         return json.loads(response.output_text)
     
     
