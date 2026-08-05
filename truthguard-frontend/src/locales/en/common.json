@@ -1,0 +1,75 @@
+{
+  "brand": "TruthGuard",
+  "nav": {
+    "home": "Home",
+    "verify": "Verify",
+    "about": "About",
+    "btn_verify": "Verify Info"
+  },
+  "hero": {
+    "badge": "🛡️ AI Fact-Checking for DRC",
+    "title_part1": "Verify Information",
+    "title_part2": "Before You Share It.",
+    "subtitle": "AI-powered fact-checking platform fighting misinformation with live source verification.",
+    "btn_primary": "Verify Now",
+    "btn_secondary": "Learn More"
+  },
+  "features": {
+    "tag": "KEY FEATURES",
+    "title": "How TruthGuard Protects Truth",
+    "card1_title": "AI Analysis",
+    "card1_desc": "Advanced algorithm extracting and analyzing key news claims automatically.",
+    "card2_title": "Verified Sources",
+    "card2_desc": "Real-time cross-referencing against trusted news outlets and official databases.",
+    "card3_title": "Image Verification",
+    "card3_desc": "Detect fake news spread via screenshots and manipulated photos.",
+    "card4_title": "Full Transparency",
+    "card4_desc": "Get a clear credibility score backed by transparent evidence and clickable sources."
+  },
+  "verify": {
+    "badge": "INFORMATION ANALYSIS",
+    "title": "Fact Verification Engine",
+    "subtitle": "Choose how you want to input your news claim for analysis.",
+    "tab_text": "Paste Text",
+    "tab_text_desc": "Paste raw text or message",
+    "tab_url": "Verify URL",
+    "tab_url_desc": "Link to an online news article",
+    "tab_image": "Upload Image",
+    "tab_image_desc": "Screenshot or photo of a post",
+    "placeholder_text": "Paste the news text, rumor, or social media post here...",
+    "placeholder_url": "https://example.com/article-to-verify",
+    "drop_image": "Drag & drop a screenshot here, or click to browse",
+    "drop_image_hint": "Supported formats: PNG, JPG, WEBP (Max 5MB)",
+    "btn_analyze": "Start Analysis"
+  },
+  "loading": {
+    "step1": "Reading & parsing article text...",
+    "step2": "Searching trusted news & official sources...",
+    "step3": "Comparing evidence & claims...",
+    "step4": "Generating TruthGuard report..."
+  },
+  "report": {
+    "badge": "VERIFICATION REPORT",
+    "title": "Analysis Results",
+    "highly_credible": "Highly Credible",
+    "needs_verification": "Needs Verification",
+    "low_credibility": "Low Credibility / Misleading",
+    "summary_title": "Analysis Summary",
+    "evidence_title": "Evidence & Source Consensus",
+    "sources_agree": "sources agreeing",
+    "sources_disagree": "sources disagreeing",
+    "sources_title": "Consulted Verified Sources",
+    "btn_read": "Read Article",
+    "recommendation_title": "TruthGuard Recommendation",
+    "safe_to_share": "Verified Information: Safe to share.",
+    "warning_share": "Unverified Information: Share with caution.",
+    "ai_assistant_title": "Need More Details?",
+    "ai_assistant_desc": "Ask questions to the TruthGuard AI Assistant.",
+    "ai_assistant_placeholder": "Ex: Which specific sources contradict this claim?",
+    "btn_new_verify": "Verify Another Claim"
+  },
+  "footer": {
+    "desc": "AI-powered fact-checking platform dedicated to DRC and Africa.",
+    "rights": "All rights reserved."
+  }
+}

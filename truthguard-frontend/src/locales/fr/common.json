@@ -1,0 +1,75 @@
+{
+  "brand": "TruthGuard",
+  "nav": {
+    "home": "Accueil",
+    "verify": "Vérifier",
+    "about": "À propos",
+    "btn_verify": "Vérifier une info"
+  },
+  "hero": {
+    "badge": "🛡️ IA de Fact-checking pour la RDC",
+    "title_part1": "Vérifiez les informations",
+    "title_part2": "avant de les partager.",
+    "subtitle": "Plateforme d'analyse et de vérification des faits alimentée par l'intelligence artificielle pour lutter contre les fausses informations.",
+    "btn_primary": "Vérifier maintenant",
+    "btn_secondary": "En savoir plus"
+  },
+  "features": {
+    "tag": "FONCTIONNALITÉS CLÉS",
+    "title": "Comment TruthGuard protège la vérité",
+    "card1_title": "Analyse par IA",
+    "card1_desc": "Algorithme avancé pour extraire et analyser automatiquement les affirmations clés.",
+    "card2_title": "Sources Vérifiées",
+    "card2_desc": "Comparaison en temps réel avec des agences de presse réputées et bases de données officielles.",
+    "card3_title": "Vérification d'Images",
+    "card3_desc": "Détectez les infox véhiculées par des captures d'écran et des photos manipulées.",
+    "card4_title": "Transparence Totale",
+    "card4_desc": "Obtenez un score de crédibilité avec des preuves claires et des liens vers les sources."
+  },
+  "verify": {
+    "badge": "ANALYSE D'INFORMATION",
+    "title": "Vérificateur de Faits",
+    "subtitle": "Sélectionnez le type d'information que vous souhaitez vérifier.",
+    "tab_text": "Texte brut",
+    "tab_text_desc": "Coller le texte d'un article ou message",
+    "tab_url": "Lien URL",
+    "tab_url_desc": "Lien d'un article de presse en ligne",
+    "tab_image": "Capture d'écran",
+    "tab_image_desc": "Image ou photo d'une publication",
+    "placeholder_text": "Collez ici le texte de l'article, la rumeur ou le message reçu sur WhatsApp/Facebook...",
+    "placeholder_url": "https://example.com/article-a-verifier",
+    "drop_image": "Glissez-déposez une capture d'écran ici, ou cliquez pour parcourir",
+    "drop_image_hint": "Formats acceptés : PNG, JPG, WEBP (Max 5Mo)",
+    "btn_analyze": "Lancer l'Analyse"
+  },
+  "loading": {
+    "step1": "Lecture et extraction de l'article...",
+    "step2": "Recherche dans les sources de presse officielles...",
+    "step3": "Comparaison des faits et preuves...",
+    "step4": "Génération du rapport TruthGuard..."
+  },
+  "report": {
+    "badge": "RAPPORT DE VÉRIFICATION",
+    "title": "Résultats de l'Analyse",
+    "highly_credible": "Très Crédible",
+    "needs_verification": "Douteux / À vérifier",
+    "low_credibility": "Faible Crédibilité / Infox",
+    "summary_title": "Résumé de l'Analyse",
+    "evidence_title": "Preuves & Consensus des Sources",
+    "sources_agree": "sources concordantes",
+    "sources_disagree": "sources contradictoires",
+    "sources_title": "Sources vérifiées consulted",
+    "btn_read": "Lire l'article",
+    "recommendation_title": "Recommandation TruthGuard",
+    "safe_to_share": "Information vérifiée : Sécurisée à partager.",
+    "warning_share": "Information douteuse : À partager avec précaution.",
+    "ai_assistant_title": "Besoin de plus de détails ?",
+    "ai_assistant_desc": "Posez vos questions à l'Assistant IA TruthGuard.",
+    "ai_assistant_placeholder": "Ex: Quelles sont les sources qui démentent cela ?",
+    "btn_new_verify": "Vérifier une autre info"
+  },
+  "footer": {
+    "desc": "Plateforme de vérification de faits propulsée par l'IA dédiée à la RDC et l'Afrique.",
+    "rights": "Tous droits réservés."
+  }
+}
