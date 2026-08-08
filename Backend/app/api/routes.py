@@ -19,7 +19,7 @@ verifier = VerificationService()
 )
 async def verify_news(request: VerificationRequest):
 
-    result = await verifier.verify(request.text)
+    result = await verifier.verify(request.claim)
 
     return VerificationResponse(
         verdict=result["verdict"],
