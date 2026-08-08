@@ -1,72 +1,90 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from '../components/ui/Badge';
-import { InputSelector } from '../components/verify/InputSelector';
-import type { InputMode } from '../components/verify/InputSelector';
-import { VerifyForm } from '../components/verify/VerifyForm';
-import { LoadingState } from '../components/verify/LoadingState';
-import { ReportDashboard } from '../components/report/ReportDashboard';
-import { verifyClaim } from '../services/api';
-import type { BackendVerifyResponse } from '../services/api';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "../components/ui/Badge";
+import { InputSelector } from "../components/verify/InputSelector";
+import type { InputMode } from "../components/verify/InputSelector";
+import { VerifyForm } from "../components/verify/VerifyForm";
+import { LoadingState } from "../components/verify/LoadingState";
+import { ReportDashboard } from "../components/report/ReportDashboard";
+import { verifyClaim } from "../services/api";
+import type { BackendVerifyResponse } from "../services/api";
 
-type VerifyState = 'input' | 'loading' | 'results';
+type VerifyState = "input" | "loading" | "results";
 
 export const VerifyPage: React.FC = () => {
   const { t } = useTranslation();
-  const [activeMode, setActiveMode] = useState<InputMode>('text');
-  const [viewState, setViewState] = useState<VerifyState>('input');
-  const [analysisResult, setAnalysisResult] = useState<BackendVerifyResponse | null>(null);
+  const [activeMode, setActiveMode] = useState<InputMode>("text");
+  const [viewState, setViewState] = useState<VerifyState>("input");
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [analysisResult, setAnalysisResult] =
+    useState<BackendVerifyResponse | null>(null);
 
-  const handleStartAnalysis = async (payload: { type: InputMode; value: string | File }) => {
-    setViewState('loading');
+  const handleStartAnalysis = async (payload: {
+    type: InputMode;
+    value: string | File;
+  }) => {
+    setViewState("loading");
+    setIsFetching(true);
 
     try {
-      // Calling FastAPI backend!
+      // Calling FastAPI backend
       const data = await verifyClaim(payload);
       setAnalysisResult(data);
     } catch (error) {
-      console.warn('Backend server not reachable yet, showing mock preview:', error);
+      console.warn(
+        "Backend server not reachable yet, showing mock preview:",
+        error,
+      );
       // Fallback demo mock if backend isn't running on local port 8000 yet
       setAnalysisResult({
-        verdict: 'Information Crédible',
+        verdict: "Information Crédible",
         confidence: 87,
-        explanation: "L'analyse croisée réalisée par TruthGuard confirme la véracité des faits rapportés.",
-        sources: [{ name: 'Reuters', url: 'https://reuters.com' }, { name: 'Radio Okapi', url: 'https://radiookapi.net' }],
+        explanation:
+          "L'analyse croisée réalisée par TruthGuard confirme la véracité des faits rapportés.",
+        sources: [
+          { name: "Reuters", url: "https://reuters.com" },
+          { name: "Radio Okapi", url: "https://radiookapi.net" },
+        ],
       });
+    } finally {
+      // Backend request finished (either success or fallback)
+      setIsFetching(false);
     }
   };
 
   const handleLoadingComplete = () => {
-    setViewState('results');
+    setViewState("results");
   };
 
   const handleReset = () => {
-    setViewState('input');
+    setViewState("input");
     setAnalysisResult(null);
+    setIsFetching(false);
   };
 
   return (
     <main className="py-12 md:py-16 max-w-4xl mx-auto px-4 sm:px-6">
-      
-      {viewState === 'input' && (
+      {viewState === "input" && (
         <div className="text-center mb-10">
-          <Badge variant="info" className="mb-4 py-1 px-3.5 text-xs font-bold uppercase tracking-wider">
-            {t('verify.badge')}
+          <Badge
+            variant="info"
+            className="mb-4 py-1 px-3.5 text-xs font-bold uppercase tracking-wider"
+          >
+            {t("verify.badge")}
           </Badge>
           <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#072B74] mb-3">
-            {t('verify.title')}
+            {t("verify.title")}
           </h1>
           <p className="text-[#6B7280] text-sm sm:text-base max-w-xl mx-auto font-body">
-            {t('verify.subtitle')}
+            {t("verify.subtitle")}
           </p>
         </div>
       )}
 
       <AnimatePresence mode="wait">
-        
         {/* INPUT MODE */}
-        {viewState === 'input' && (
+        {viewState === "input" && (
           <motion.div
             key="view-input"
             initial={{ opacity: 0, y: 15 }}
@@ -74,13 +92,19 @@ export const VerifyPage: React.FC = () => {
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.3 }}
           >
-            <InputSelector activeMode={activeMode} onSelectMode={setActiveMode} />
-            <VerifyForm activeMode={activeMode} onAnalyze={handleStartAnalysis} />
+            <InputSelector
+              activeMode={activeMode}
+              onSelectMode={setActiveMode}
+            />
+            <VerifyForm
+              activeMode={activeMode}
+              onAnalyze={handleStartAnalysis}
+            />
           </motion.div>
         )}
 
         {/* LOADING MODE */}
-        {viewState === 'loading' && (
+        {viewState === "loading" && (
           <motion.div
             key="view-loading"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -88,12 +112,15 @@ export const VerifyPage: React.FC = () => {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
           >
-            <LoadingState onComplete={handleLoadingComplete} />
+            <LoadingState
+              isLoading={isFetching}
+              onComplete={handleLoadingComplete}
+            />
           </motion.div>
         )}
 
         {/* RESULTS MODE */}
-        {viewState === 'results' && (
+        {viewState === "results" && (
           <motion.div
             key="view-results"
             initial={{ opacity: 0, y: 20 }}
@@ -104,9 +131,7 @@ export const VerifyPage: React.FC = () => {
             <ReportDashboard result={analysisResult} onReset={handleReset} />
           </motion.div>
         )}
-
       </AnimatePresence>
-
     </main>
   );
 };

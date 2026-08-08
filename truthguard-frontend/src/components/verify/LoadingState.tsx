@@ -1,42 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { Shield, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+import { Shield, CheckCircle2, Loader2 } from "lucide-react";
 
 interface LoadingStateProps {
+  isLoading: boolean;
   onComplete: () => void;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({ onComplete }) => {
+export const LoadingState: React.FC<LoadingStateProps> = ({
+  isLoading,
+  onComplete,
+}) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    t('loading.step1'),
-    t('loading.step2'),
-    t('loading.step3'),
-    t('loading.step4'),
+    t("loading.step1"),
+    t("loading.step2"),
+    t("loading.step3"),
+    t("loading.step4"),
   ];
 
+  // Advance step progress every 1.2s until reaching the penultimate step
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentStep((prev) => {
+        // Hold at step 2 (index 2) while backend is still fetching
         if (prev < steps.length - 1) {
           return prev + 1;
-        } else {
-          clearInterval(timer);
-          setTimeout(onComplete, 600); // Complete after last step
-          return prev;
         }
+        return prev;
       });
     }, 1200);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [steps.length]);
+
+  // When API request finishes (isLoading turns false), rush through to the end
+  useEffect(() => {
+    if (!isLoading) {
+      // Force progress to complete all steps
+      setCurrentStep(steps.length - 1);
+
+      // Brief delay so user sees the final step checkmark before transition
+      const completeTimer = setTimeout(() => {
+        onComplete();
+      }, 600);
+
+      return () => clearTimeout(completeTimer);
+    }
+  }, [isLoading, steps.length, onComplete]);
 
   return (
     <div className="bg-white rounded-[18px] border border-gray-200 p-8 md:p-12 shadow-md max-w-xl mx-auto text-center">
-      
       <div className="w-16 h-16 rounded-2xl bg-blue-50 text-[#072B74] flex items-center justify-center mx-auto mb-6 relative">
         <Shield className="w-8 h-8 text-[#1976D2]" />
         <Loader2 className="w-12 h-12 text-[#072B74] absolute animate-spin opacity-40" />
@@ -48,8 +65,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ onComplete }) => {
 
       <div className="flex flex-col gap-4 text-left max-w-md mx-auto mb-8">
         {steps.map((stepText, idx) => {
-          const isDone = idx < currentStep;
-          const isCurrent = idx === currentStep;
+          const isDone =
+            idx < currentStep || (!isLoading && idx === steps.length - 1);
+          const isCurrent = idx === currentStep && isLoading;
 
           return (
             <div key={idx} className="flex items-center gap-3">
@@ -65,10 +83,10 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ onComplete }) => {
               <span
                 className={`text-sm font-body transition-colors ${
                   isDone
-                    ? 'text-gray-900 font-medium'
+                    ? "text-gray-900 font-medium"
                     : isCurrent
-                    ? 'text-[#072B74] font-semibold'
-                    : 'text-gray-400'
+                      ? "text-[#072B74] font-semibold"
+                      : "text-gray-400"
                 }`}
               >
                 {stepText}
@@ -82,12 +100,15 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ onComplete }) => {
       <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
         <motion.div
           className="bg-gradient-to-r from-[#1976D2] to-[#072B74] h-full"
-          initial={{ width: '0%' }}
-          animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+          initial={{ width: "0%" }}
+          animate={{
+            width: !isLoading
+              ? "100%"
+              : `${((currentStep + 1) / steps.length) * 90}%`, // Caps at 90% until backend returns
+          }}
           transition={{ duration: 0.5 }}
         />
       </div>
-
     </div>
   );
 };
