@@ -59,3 +59,11 @@ coverage.xml
 *.bin
 *.tmp
 /node_modules/
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files
+storage/uploads/*
