@@ -20,6 +20,8 @@ class AIService:
                     "role": "system",
                     "content": """
     You are a fact-checking assistant.
+    
+    Return the verification result in the language of the claim.
 
     Analyze news claims using the provided articles.
 
@@ -53,6 +55,7 @@ class AIService:
         )
 
         logger.info("GPT verification Completed")
+        print(f"GPT response: {json.loads(response.output_text)}")
         return json.loads(response.output_text)
     
     
