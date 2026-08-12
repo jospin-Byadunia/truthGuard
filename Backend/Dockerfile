@@ -1,7 +1,7 @@
 # 1. Lock Python to 3.11 slim
 FROM python:3.11-slim
 EXPOSE 8000
-
+ENV MAKEFLAGS="-j1"
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_ROOT_USER_ACTION=ignore
@@ -22,7 +22,7 @@ WORKDIR /app
 RUN python -m pip install --no-cache-dir --upgrade pip
 
 # 3. Pre-install PaddlePaddle CPU wheel
-RUN python -m pip install --no-cache-dir paddlepaddle==3.3.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
+RUN python -m pip install --no-cache-dir --only-binary=:all: paddlepaddle==3.3.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
 
 # 4. Copy and install Python dependencies (Cached layer)
 # Adjust path if requirements.txt is in backend/ e.g., COPY backend/requirements.txt .
