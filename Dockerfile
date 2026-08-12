@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m pip install --no-cache-dir --upgrade pip
 
 # 3. PaddlePaddle CPU Installation
-RUN python -m pip install --no-cache-dir paddlepaddle==2.6.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
+RUN python -m pip install --no-cache-dir paddlepaddle==3.3.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
 
 # 4. Copy and Install Requirements
 COPY requirements.txt .
