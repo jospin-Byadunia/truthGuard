@@ -1,4 +1,4 @@
-# 1. Base Image
+# 1. Lock Python to 3.10 slim
 FROM python:3.10-slim
 
 EXPOSE 8000
@@ -6,7 +6,7 @@ EXPOSE 8000
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 2. System Dependencies
+# 2. Install system dependencies required by OpenCV & Paddle
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libgl1 \
@@ -15,25 +15,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt-get/lists/*
 
+# Upgrade pip
 RUN python -m pip install --no-cache-dir --upgrade pip
 
-# 3. PaddlePaddle CPU Installation
+# 3. Pre-install PaddlePaddle CPU wheel
 RUN python -m pip install --no-cache-dir paddlepaddle==3.3.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
 
-# 4. Copy and Install Requirements
+# 4. Install remaining pip requirements
 COPY requirements.txt .
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# 5. Set Working Directory & Copy Backend Code
-WORKDIR /app
+# 5. Copy repo and set working directory to backend/
 COPY . /app
+WORKDIR /app/backend
 
-# Set PYTHONPATH to /app/backend so "from app.api.routes import router" resolves cleanly
+# Set Python module search path to backend/
 ENV PYTHONPATH=/app/backend
 
-# 6. Non-Root User Setup
+# 6. Non-root user setup
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
 USER appuser
 
-# 7. Start Command (points directly to backend.main:app)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker", "backend.main:app"]
+# 7. Start server pointing to app/main.py
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"]
