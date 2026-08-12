@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck } from 'lucide-react';
-import logoImg from '../../assets/logo.jpeg'; // Import your logo image
+import logoImg from '../../assets/logo.jpeg';
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
