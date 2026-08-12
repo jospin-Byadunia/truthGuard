@@ -4,11 +4,11 @@ from app.api.photo import router as photo_router
 from app.api.urls import router as url_router
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="NewsGuardian API")
+app = FastAPI(title="TruthGuard API")
 
 origins = [
     "http://localhost:3000",
-    "https://your-frontend-domain.com",
+    "https://truth-guard-rho.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     # Add more allowed origins as needed
