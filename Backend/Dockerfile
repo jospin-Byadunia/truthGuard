@@ -17,6 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Upgrade pip
 RUN python -m pip install --no-cache-dir --upgrade pip
 
+# Suppress the root user warning globally for pip
+ENV PIP_ROOT_USER_ACTION=ignore
+
+# Your existing pip install command
+RUN python -m pip install --no-cache-dir -r requirements.txt
+
 # 3. Pre-install PaddlePaddle CPU wheel
 RUN python -m pip install --no-cache-dir paddlepaddle==3.3.1 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-mkl/stable.html
 
