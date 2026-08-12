@@ -1,6 +1,6 @@
 services:
-  factcheck:
-    image: factcheck
+  backend:
+    image: backend
     build:
       context: .
       dockerfile: ./Dockerfile
