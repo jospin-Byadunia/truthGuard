@@ -1,6 +1,5 @@
-# 1. Lock Python to 3.10 slim
-FROM python:3.10-slim
-
+# 1. Lock Python to 3.11 slim
+FROM python:3.11-slim
 EXPOSE 8000
 
 ENV PYTHONDONTWRITEBYTECODE=1
