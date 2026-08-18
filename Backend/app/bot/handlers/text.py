@@ -1,22 +1,16 @@
+import httpx
+
 from telegram import Update
 from telegram.ext import ContextTypes
-
-from app.services.verify import VerificationService
-from app.utils.logger import logger
+from app.Core.config import API_URL
 
 
-# Create the verification service once
-verifier = VerificationService()
 
 
 async def handle_text(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
-    """
-    Handle normal text messages and send them
-    to the verification service.
-    """
 
     if not update.message or not update.message.text:
         return
@@ -26,51 +20,114 @@ async def handle_text(
     if not user_text:
         return
 
-    logger.info(
-        f"Text verification request from user "
-        f"{update.effective_user.id}: {user_text[:100]}"
+    # Show processing message
+    processing = await update.message.reply_text(
+        "🔍 Verifying your news..."
     )
 
     try:
-        # All verification logic happens inside verify.py
-        result = await verifier.verify(user_text)
 
-        # Protect against an unexpected None response
-        if not result:
-            await update.message.reply_text(
-                "❌ Sorry, I could not verify this information right now."
+        async with httpx.AsyncClient(
+            timeout=120
+        ) as client:
+
+            response = await client.post(
+                API_URL,
+                json={
+                    "claim": user_text
+                }
             )
-            return
 
-        verdict = result.get("verdict", "Unknown")
-        confidence = result.get("confidence", 0)
-        explanation = result.get("explanation", "")
-        sources = result.get("sources", [])
+            # Check HTTP status
+            response.raise_for_status()
 
-        # Build Telegram response
-        response = (
-            f"🔎 Verification Result\n\n"
-            f"📌 Verdict: {verdict}\n"
-            f"📊 Confidence: {confidence}%\n\n"
-            f"💡 Explanation:\n"
-            f"{explanation}"
+            data = response.json()
+
+            if not data:
+
+                await processing.edit_text(
+                    "❌ The server returned an empty response."
+                )
+
+                return
+
+            print(
+                f"Received verification response: {data}"
+            )
+
+        # Extract response safely
+        verdict = data.get(
+            "verdict",
+            "Unknown"
         )
 
-        # Add sources if available
+        confidence = data.get(
+            "confidence",
+            0
+        )
+
+        explanation = data.get(
+            "explanation",
+            "No explanation available."
+        )
+
+        sources = data.get(
+            "sources",
+            []
+        )
+
+        message = f"""
+🔍 Fact Check Result
+
+📌 Verdict:
+{verdict}
+
+📊 Confidence:
+{confidence}%
+
+💡 Explanation:
+{explanation}
+
+🔗 Sources:
+"""
+
         if sources:
-            response += "\n\n🔗 Sources:\n"
 
             for source in sources:
-                response += f"• {source}\n"
+                message += f"\n• {source}"
 
-        await update.message.reply_text(response)
+        else:
 
-    except Exception as e:
-        logger.exception(
-            f"Error verifying text message: {e}"
+            message += "\nNo sources available."
+
+        await processing.edit_text(
+            message
         )
 
-        await update.message.reply_text(
-            "❌ An error occurred while verifying your message. "
-            "Please try again later."
+    except httpx.TimeoutException:
+
+        await processing.edit_text(
+            "⏱️ The verification server took too long to respond. "
+            "Please try again."
+        )
+
+    except httpx.HTTPStatusError as e:
+
+        print(
+            f"API HTTP error: {e}"
+        )
+
+        await processing.edit_text(
+            "❌ The verification server returned an error."
+        )
+
+    except Exception as e:
+
+        print(
+            f"Text verification error: {e}"
+        )
+
+        await processing.edit_text(
+            "❌ Something went wrong while verifying "
+            "your message."
         )
