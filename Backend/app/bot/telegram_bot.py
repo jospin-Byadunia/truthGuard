@@ -7,14 +7,13 @@ from telegram.ext import (
     filters,
 )
 
-from app.Core.config import BOT_TOKEN, OPENAI_API_KEY
-from app.services.getarticle import get_articles
+from app.Core.config import BOT_TOKEN
+
 from app.bot.handlers.photo import handle_photo
 from app.bot.handlers.url import handle_url
-from app.utils.logger import logger
+from app.bot.handlers.text import handle_text
 
-import openai
-import re
+from app.utils.logger import logger
 
 
 WELCOME_MESSAGE = """
@@ -32,6 +31,7 @@ and I'll verify it.
 
 HELP_MESSAGE = """
 Send me:
+
 • News text
 • A screenshot
 • A news URL
@@ -44,13 +44,10 @@ I'll analyze it and explain the result.
 URL_PATTERN = r"https?://[^\s]+"
 
 
-# OpenAI client
-client = openai.OpenAI(
-    api_key=OPENAI_API_KEY
-)
-
-
-async def start(update, context):
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
 
     if update.message:
 
@@ -62,93 +59,31 @@ async def start(update, context):
             WELCOME_MESSAGE
         )
 
+
 async def help_command(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
 ):
 
     if update.message:
+
         await update.message.reply_text(
             HELP_MESSAGE
         )
 
 
-async def handle_message(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    if not update.message or not update.message.text:
-        return
-
-
-    user_text = update.message.text.strip()
-
-
-    print("TEXT MESSAGE:")
-    print(user_text)
-
-
-    # Fetch related articles
-    article_context = await get_articles(
-        user_text
-    )
-
-
-    response = client.chat.completions.create(
-        model="gpt-5.5",
-        messages=[
-            {
-                "role": "system",
-                "content": """
-You are a fact-checking assistant.
-
-Your tasks:
-
-- Analyze news claims.
-- Compare claims with provided sources.
-- Determine if information is true, false, misleading, or partially true.
-- Explain reasoning.
-- Provide confidence percentage.
-
-Rules:
-- Do not invent sources.
-- Only use provided articles as evidence.
-"""
-            },
-
-            {
-                "role": "user",
-                "content": f"""
-Claim from user:
-
-{user_text}
-
-
-Available news sources:
-
-{article_context}
-
-
-Perform fact checking.
-"""
-            }
-        ]
-    )
-
-
-    await update.message.reply_text(
-        response.choices[0].message.content
-    )
-
-
-
 def create_bot():
 
-    application = Application.builder().token(
-        BOT_TOKEN
-    ).build()
+    application = (
+        Application
+        .builder()
+        .token(BOT_TOKEN)
+        .build()
+    )
 
+    # -----------------------------
+    # URL messages
+    # -----------------------------
 
     application.add_handler(
         MessageHandler(
@@ -156,6 +91,10 @@ def create_bot():
             handle_url
         )
     )
+
+    # -----------------------------
+    # Photo + URL caption
+    # -----------------------------
 
     application.add_handler(
         MessageHandler(
@@ -165,13 +104,16 @@ def create_bot():
         )
     )
 
+    # -----------------------------
+    # Commands
+    # -----------------------------
+
     application.add_handler(
         CommandHandler(
             "start",
             start
         )
     )
-
 
     application.add_handler(
         CommandHandler(
@@ -180,6 +122,9 @@ def create_bot():
         )
     )
 
+    # -----------------------------
+    # Photo verification
+    # -----------------------------
 
     application.add_handler(
         MessageHandler(
@@ -188,21 +133,22 @@ def create_bot():
         )
     )
 
+    # -----------------------------
+    # Text verification
+    # -----------------------------
 
     application.add_handler(
         MessageHandler(
             filters.TEXT
             & ~filters.COMMAND
             & ~filters.Regex(URL_PATTERN),
-            handle_message
+            handle_text
         )
     )
 
-
-    print("Bot is running...")
+    logger.info("Bot is running...")
 
     return application
-
 
 
 if __name__ == "__main__":
